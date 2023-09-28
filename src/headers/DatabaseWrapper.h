@@ -15,8 +15,6 @@ public:
         auto _keys = torch::from_blob(key_ptr, {n_keys, embedding_size});
         auto _values = torch::from_blob(value_ptr, {n_keys, embedding_size});
         if (is_empty){
-            std::cout << _keys << std::endl;
-            std::cout << _values << std::endl;
             keys = _keys;
             values = _values;
             is_empty = false;
@@ -34,12 +32,13 @@ public:
 
         auto dot_prods = query_tensor.matmul(keys.transpose(0,1));
         std::cout << dot_prods << std::endl;
+        std::cout << result_ptr << std::endl;
         //Using the following we will calculate the top num_results dot products
         // inline ::std::tuple<torch::Tensor, torch::Tensor> topk(intf64_t k, intf64_t dim = -1, bool largest = true, bool sorted = true) const
         torch::Tensor topk_values, topk_indices;
         std::tie(topk_values, topk_indices) = dot_prods.topk(num_results, 1, true, true);
-        // topk_values is a tensor of shape [batch_size, num_results]
-        //store it in result
+        std::cout << topk_values << std::endl;
+        std::cout << topk_indices << std::endl;
         for(int i=0; i<num_results; i++){
             for (int j=0; j<n_queries; j++){
                 result[j][i] = values[topk_indices[j][i]];   

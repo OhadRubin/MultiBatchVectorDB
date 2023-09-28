@@ -48,15 +48,16 @@ cdef class VectorDatabase:
                             emb_dim, n_keys)
 
     def batch_query(self, query_vectors):
+        query_vectors = query_vectors.astype(np.float32)
         _query_vectors = torch.from_numpy(query_vectors)
         n_queries = _query_vectors.shape[0]
         emb_dim = _query_vectors.shape[1]
-        result = np.zeros((self._num_consumers, self._n_vecs_per_consumer, self._num_results), dtype=np.float32)
+        result = np.zeros((self._num_consumers, n_queries, self._num_results), dtype=np.float32)
         result = torch.from_numpy(result)
         cdef unsigned long addr_1
         cdef unsigned long addr_2
 
-        for k in range(self._num_consumers * self._n_vecs_per_consumer):
+        for k in range(self._num_consumers * n_queries):
             addr_1 = _query_vectors[k].data_ptr()
             addr_2 = result[k].data_ptr()
             self._dbs[k].query(<float*>  addr_1,
